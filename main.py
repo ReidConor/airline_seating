@@ -1,17 +1,8 @@
 import sqlite3
 import pandas as pd
-from booking import *
 import numpy as np
-
-
-def clean_db():
-    conn = sqlite3.connect('./data/airline_seating.db')
-    c = conn.cursor()
-    for n in range(60):
-        # print("update seating set `name` = '' where `_rowid_` = %s" % (n+1,))
-        c.execute("update seating set `name` = '' where `_rowid_` = %s" % (n+1,))
-    conn.commit()
-    conn.close()
+from model import booking
+from db import dbOperations
 
 
 def read_in_data():
@@ -43,42 +34,22 @@ def get_next_seat(current_seat, row):
     return -1
 
 
-def print_seating_plan():
-    # connection details
-    conn = sqlite3.connect('./data/airline_seating.db')
-    c = conn.cursor()
-    all_seats = c.execute("select * from seating")
-
-    # create the dict, assign the row number as the key
-    # and an empty list as the value
-    myDict = {}
-    for n in range (15):
-        myDict[n+1] = []
-
-    # fill the dict with the names of people in each seat
-    for row, seat, name in all_seats:
-        myDict[row].append(name)
-
-    # print the dict
-    for key, values in myDict.items():
-        print (values)
-
-
-
 def main():
 
-    clean_db()
+    dbOperations.clean_db()
 
     # read in the data
     df = read_in_data()
 
+
     for index, row in df.iterrows():
-        # print (row[0], row[1])
         # create a booking object with the name of the booker and the amount of seats required
-        a_booking = Booking(row[0], row[1])
+        a_booking = booking.Booking(row[0], row[1])
+
         # make the booking
         make_booking(a_booking)
 
-    print_seating_plan()
+
+    dbOperations.print_seating_plan()
 
 main()
