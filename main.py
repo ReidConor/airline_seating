@@ -5,22 +5,19 @@ import os
 from model import booking
 from db import dbOperations
 
-
-
 def read_in_data(pathToFile):
-    df = pd.read_csv(pathToFile, sep=",", header=None)
-    bookings = []
-
-    for row in df:
-        print(row[0])
-        print(row[1])
+    bookingsFile = pd.read_csv(pathToFile, sep=",", header=None)
+    allBookings = []
+    for index, row in bookingsFile.iterrows():
         nextBooking = booking.Booking(row[0],row[1])
-        bookings.add(nextBooking)
+        allBookings.append(nextBooking)
 
-    #print (bookings.size())
+    #below is a list of booking objects,
+    #containing all bookings to be made
+    return allBookings
 
-def read_db_details():
-    conn = sqlite3.connect('./data/airline_seating.db')
+def read_db_details(pathToDB):
+    conn = sqlite3.connect(pathToDB)
 
     #get db dimentions
     details = conn.cursor().execute("SELECT * FROM rows_cols;").fetchone()
@@ -33,21 +30,16 @@ def read_db_details():
     freeSeats=0
     for entry in names_column:
         if entry == ('',):
-            #print("in")
             freeSeats+=1
 
-    #print("Number of rows is: ",nrows)
-    #print("Seat lettering is: ", seats)
-    #print ("Number of seats is: ", numberOfSeats)
-    #print("Number of free seats is: ", freeSeats)
+    #create a dict, fill it with this methods results and return it
+    dbDetails = {}
+    dbDetails["nrows"]=nrows
+    dbDetails["seatLettering"]=seats
+    dbDetails["numberOfSeats"]=numberOfSeats
+    dbDetails["freeSeats"]=freeSeats
 
-    resultsDict = {}
-    resultsDict["nrows"]=nrows
-    resultsDict["seatLettering"]=seats
-    resultsDict["numberOfSeats"]=numberOfSeats
-    resultsDict["freeSeats"]=freeSeats
-
-    return resultsDict
+    return dbDetails
 
 
 def make_booking(Booking):
@@ -85,11 +77,11 @@ def main():
     #clean the db's exsiting entries
     dbOperations.clean_db()
 
-    dbDetails = read_db_details()
+    dbDetails = read_db_details('data/airline_seating.db')
 
 
     # read in the data
-    #df = read_in_data()
+    df = read_in_data("data/sample_bookings.csv")
 
 
     #for index, row in df.iterrows():
