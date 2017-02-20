@@ -1,7 +1,8 @@
 import sqlite3
 
-def clean_db():
-    conn = sqlite3.connect('./data/airline_seating.db')
+def clean_db(DB):
+    # conn = sqlite3.connect('./data/airline_seating.db')
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
     for n in range(60):
         # print("update seating set `name` = '' where `_rowid_` = %s" % (n+1,))
@@ -10,9 +11,10 @@ def clean_db():
     conn.close()
 
 
-def print_seating_plan():
+def print_seating_plan(DB):
     # connection details
-    conn = sqlite3.connect('./data/airline_seating.db')
+    # conn = sqlite3.connect('./data/airline_seating.db')
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
     all_seats = c.execute("select * from seating")
 
