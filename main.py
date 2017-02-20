@@ -30,7 +30,7 @@ def read_plane_details(pathToDB):
     rows = np.arange(1,rows_and_columns[0]+1)
     nrows = len(rows)
     #seat lettering
-    seats = rows_and_columns[1]
+    seats = (rows_and_columns[1])
     numberOfSeats = nrows * len(seats)
 
     #get lists of free and occupied seats. Each record contains the row num, seat letter and name (if any)
@@ -42,19 +42,23 @@ def read_plane_details(pathToDB):
     #create a dict of row numbers and the amount of seats available in each row, as well as what those seats actually are
     seatsInRows = {}
     for row in rows:
-        seatsInRows[row] = [len(seats),str(seats)]
+        seatsInRows[row] = {}
+        seatsInRows[row]["numSeats"]=len(seats)
+        seatsInRows[row]["seatLetters"]=seats
+    # print(seatsInRows)
+    # print()
 
     #update to remove seats already taken at time of db read
     for seat in occupiedSeats:
+        # print("Row number: ", seat[0])
         occupiedSeatLetter = seat[1]
-        numSeatsLeftInRow = seatsInRows[seat[0]][0]
-        seatsLeftInRow = seatsInRows[seat[0]][1]
-
-        numSeatsLeftInRow -= 1
-        seatsLeftInRow = seatsLeftInRow.replace(occupiedSeatLetter, "")#http://stackoverflow.com/questions/3559559/how-to-delete-a-character-from-a-string-using-python
-
-    # print(seats_in_rows)
-
+        # print(occupiedSeatLetter)
+        seatsInRows[seat[0]]["numSeats"] -= 1
+        # print(seatsInRows[seat[0]]["seatLetters"])
+        # seatsInRows[seat[0]]["seatLetters"].remove(str(occupiedSeatLetter))
+        # seatsInRows[seat[0]]["seatLetters"] = seatsInRows[seat[0]]["seatLetters"].remove(str(occupiedSeatLetter))
+        seatsInRows[seat[0]]["seatLetters"] = seatsInRows[seat[0]]["seatLetters"].replace(occupiedSeatLetter, '')#http://stackoverflow.com/questions/3559559/how-to-delete-a-character-from-a-string-using-python
+    # print(seatsInRows)
     #create a dict, fill it with this methods results
     planeDetails = {}
     planeDetails["rows"]=rows
@@ -74,15 +78,104 @@ def read_plane_details(pathToDB):
     return planeDetails
 
 
-def make_booking(booking, planeDetails):
+def make_bookings(bookingsList, planeDetails):
     conn = sqlite3.connect('./data/airline_seating.db')
     c = conn.cursor()
+
+    #set up metrics to be updated below
+    passengersSeparated=0
+    groupsSeparated=0
+    passengersRejected=0
+    groupsRejected=0
+
+    #loop through all incoming bookings
+    for nextBooking in bookingsList:
+        #get the maximum amount of seats in any one row, and find the last row where that is true
+        maxInRow = 0
+        rowNum = 0
+        # print("There are: " , maxInRow, " seats in row number: ", rowNum)
+        # print(rowNum)
+        # for row in planeDetails["seatsInRows"].values():
+        #     if maxInRow < row['numSeats']:
+        #         maxInRow = row['numSeats']
+        # print("Max seats in any row: ", maxInRow)
+        for row in planeDetails["seatsInRows"]:
+            # print()
+            # print(planeDetails["seatsInRows"][row]['numSeats'])
+            # print(row)
+            # print(planeDetails["seatsInRows"][row]['numSeats'])
+            # print(maxInRow)
+            # print(nextBooking.parties)
+            if planeDetails["seatsInRows"][row]['numSeats'] == nextBooking.parties:
+                maxInRow = planeDetails["seatsInRows"][row]['numSeats']
+                rowNum=row
+                break
+            elif planeDetails["seatsInRows"][row]['numSeats'] >= maxInRow:
+                maxInRow = planeDetails["seatsInRows"][row]['numSeats']
+                rowNum=row
+                # print("There are: " , maxInRow, " seats in row number: ", rowNum)
+
+
+
+        if planeDetails['numFreeSeats'] >= nextBooking.parties:
+            #if this bookings parties is less than this max seat count
+            if nextBooking.parties <= maxInRow:
+                print("Can seat", nextBooking.name, "together for", nextBooking.parties, " in row number: ", rowNum)
+                row=planeDetails["seatsInRows"][rowNum]
+                # print(row)s
+                while nextBooking.parties > 0:
+                    # print(nextBooking.name)
+                    row['seatLetters'] = list(row['seatLetters'])
+                    # print(row['seatLetters'])
+                    seat = row['seatLetters'].pop()
+                    # seatLetter = list(row['seatLetters']).pop()
+                    # list(row['seatLetters']).remove('A')
+                    # print(seatLetter)
+                    # print("UPDATE seating SET name='%s' WHERE row=%d AND seat='%s';" %(nextBooking.name, rowNum, seat))
+                    c.execute("UPDATE seating SET name='%s' WHERE row=%d AND seat='%s';" %(nextBooking.name, rowNum, seat))
+                    # print(row['seatLetters'])
+                    nextBooking.parties -= 1
+                    planeDetails['numFreeSeats'] -= 1
+                    row['numSeats'] -= 1
+                    conn.commit()
+            # elif nextBooking.parties <= planeDetails:
+            else:
+                print("Can't seat", nextBooking.name, "together for", nextBooking.parties, "people")
+                #update metrics
+                passengersSeparated += nextBooking.parties
+                groupsSeparated += 1
+                passengerCounter = nextBooking.parties
+                for row in planeDetails["seatsInRows"]:
+                    if planeDetails["seatsInRows"][row]['numSeats'] > 0: #found a row that has some seats left
+                        while(passengerCounter > 0):
+                            while planeDetails["seatsInRows"][row]['numSeats'] > 0:
+                                # print(planeDetails["seatsInRows"][row]['numSeats'])
+                                # print(planeDetails["seatsInRows"][row]['seatLetters'])
+                                planeDetails["seatsInRows"][row]['seatLetters'] = list(planeDetails["seatsInRows"][row]['seatLetters'])
+                                thisSeat = planeDetails["seatsInRows"][row]['seatLetters'].pop()
+                                # print(nextBooking.name, row, thisSeat)
+                                c.execute("UPDATE seating SET name='%s' WHERE row=%d AND seat='%s';" %(nextBooking.name, row, thisSeat))
+                                conn.commit()
+                                passengerCounter-=1
+                                planeDetails["seatsInRows"][row]['numSeats']-=1
+                                planeDetails['numFreeSeats'] -= 1
+                                if (passengerCounter == 0):
+                                    break
+                            break
+        else:
+            print("Cant do it for:", nextBooking.name, nextBooking.parties,  ". Not enough seats")
+            # rejectBooking(nextBooking)
+
+
+def rejectBooking(booking):
+    print("In rejectBooking")
+    print(booking.name)
+    print(booking.parties)
 
 
 
 def main():
-
-    #when runnign in terminal, clear the screen
+    #when running in terminal, clear the screen
     #os.system('cls')#for windows
     os.system('clear')#for linux based os
 
@@ -94,28 +187,20 @@ def main():
 
     #read the plane details
     planeDetails = read_plane_details('data/airline_seating.db')
-    print("rows: ",planeDetails["rows"])
-    print("nrows: ",planeDetails["nrows"])
-    print("seatLettering: ",planeDetails["seatLettering"])
-    print("numSeats: ",planeDetails["numSeats"])
-    print("numFreeSeats: ",planeDetails["numFreeSeats"])
-    print("numOccupiedSeats: ",planeDetails["numOccupiedSeats"])
-    print("listFreeSeats: ",planeDetails["listFreeSeats"])
-    print("listOccupiedSeats: ",planeDetails["listOccupiedSeats"])
-    print("seatsInRows: ",planeDetails["seatsInRows"])
+    # print("rows: ",planeDetails["rows"])
+    # print("nrows: ",planeDetails["nrows"])
+    # print("seatLettering: ",planeDetails["seatLettering"])
+    # print("numSeats: ",planeDetails["numSeats"])
+    # print("numFreeSeats: ",planeDetails["numFreeSeats"])
+    # print("numOccupiedSeats: ",planeDetails["numOccupiedSeats"])
+    # print("listFreeSeats: ",planeDetails["listFreeSeats"])
+    # print("listOccupiedSeats: ",planeDetails["listOccupiedSeats"])
+    # print("seatsInRows: ",planeDetails["seatsInRows"])
 
-    #make the booking for each entry
-    # for booking in bookingsList:
-        # make_booking(booking, planeDetails)
+    #make the bookings
+    make_bookings(bookingsList, planeDetails)
 
-    #for index, row in df.iterrows():
-        # create a booking object with the name of the booker and the amount of seats required
-        #a_booking = booking.Booking(row[0], row[1])
-
-        # make the booking
-        #make_booking(a_booking)
-
-
-    #dbOperations.print_seating_plan()
+    #print the layout of the plane
+    dbOperations.print_seating_plan()
 
 main()
