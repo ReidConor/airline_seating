@@ -2,7 +2,8 @@ import sqlite3
 import pandas as pd
 import numpy as np
 import os
-from model import booking, plane
+import sys
+from model import booking
 from db import dbOperations
 
 def read_in_data(pathToFile):
@@ -14,6 +15,7 @@ def read_in_data(pathToFile):
 
     #below is a list of booking objects,
     #containing all bookings to be made
+    # print(len(allBookings))
     return allBookings
 
 
@@ -78,8 +80,8 @@ def read_plane_details(pathToDB):
     return planeDetails
 
 
-def make_bookings(bookingsList, planeDetails):
-    conn = sqlite3.connect('./data/airline_seating.db')
+def make_bookings(bookingsList, planeDetails, db):
+    conn = sqlite3.connect(db)
     c = conn.cursor()
 
     #set up metrics to be updated below
@@ -179,14 +181,25 @@ def main():
     #os.system('cls')#for windows
     os.system('clear')#for linux based os
 
+    #if args are three (ie file name itself, and the db and bookings file names)
+    #use those
+    #if not, use those stored in the project
+    if len(sys.argv) == 3:
+        db = sys.argv[1]
+        bookings = sys.argv[2]
+    else:
+        print("No arguments provided. Using db and bookings files contained in the project.")
+        db = "db/airline_seating.db"
+        bookings = "data/bookings.csv"
+
     #clean the db's exsiting entries if required
-    # dbOperations.clean_db()
+    dbOperations.clean_db(db)
 
     # read in the data
-    bookingsList = read_in_data("data/sample_bookings.csv")
+    bookingsList = read_in_data(bookings)
 
     #read the plane details
-    planeDetails = read_plane_details('data/airline_seating.db')
+    planeDetails = read_plane_details(db)
     # print("rows: ",planeDetails["rows"])
     # print("nrows: ",planeDetails["nrows"])
     # print("seatLettering: ",planeDetails["seatLettering"])
@@ -198,9 +211,9 @@ def main():
     # print("seatsInRows: ",planeDetails["seatsInRows"])
 
     #make the bookings
-    make_bookings(bookingsList, planeDetails)
+    make_bookings(bookingsList, planeDetails, db)
 
     #print the layout of the plane
-    dbOperations.print_seating_plan()
+    dbOperations.print_seating_plan(db)
 
 main()
