@@ -179,7 +179,7 @@ def main():
     #os.system('cls')#for windows
     os.system('clear')#for linux based os
 
-    #clean the db's exsiting entries
+    #clean the db's exsiting entries if required
     # dbOperations.clean_db()
 
     # read in the data
