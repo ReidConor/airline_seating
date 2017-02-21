@@ -86,9 +86,7 @@ def make_bookings(bookingsList, planeDetails, db):
 
     #set up metrics to be updated below
     passengersSeparated=0
-    groupsSeparated=0
     passengersRejected=0
-    groupsRejected=0
 
     #loop through all incoming bookings
     for nextBooking in bookingsList:
@@ -122,7 +120,7 @@ def make_bookings(bookingsList, planeDetails, db):
         if planeDetails['numFreeSeats'] >= nextBooking.parties:
             #if this bookings parties is less than this max seat count
             if nextBooking.parties <= maxInRow:
-                print("Can seat", nextBooking.name, "together for", nextBooking.parties, " in row number: ", rowNum)
+                print("Can seat", nextBooking.name, "together for", nextBooking.parties, "people. Using row number: ", rowNum)
                 row=planeDetails["seatsInRows"][rowNum]
                 # print(row)s
                 while nextBooking.parties > 0:
@@ -145,7 +143,8 @@ def make_bookings(bookingsList, planeDetails, db):
                 print("Can't seat", nextBooking.name, "together for", nextBooking.parties, "people")
                 #update metrics
                 passengersSeparated += nextBooking.parties
-                groupsSeparated += 1
+                c.execute("UPDATE metrics SET passengers_separated='%s'" %passengersSeparated)
+
                 passengerCounter = nextBooking.parties
                 for row in planeDetails["seatsInRows"]:
                     if planeDetails["seatsInRows"][row]['numSeats'] > 0: #found a row that has some seats left
@@ -166,15 +165,9 @@ def make_bookings(bookingsList, planeDetails, db):
                             break
         else:
             print("Cant do it for:", nextBooking.name, nextBooking.parties,  ". Not enough seats")
-            # rejectBooking(nextBooking)
-
-
-def rejectBooking(booking):
-    print("In rejectBooking")
-    print(booking.name)
-    print(booking.parties)
-
-
+            passengersRejected+=1
+            c.execute("UPDATE metrics SET passengers_refused='%s'" %passengersRejected)
+            conn.commit()
 
 def main():
     #when running in terminal, clear the screen
