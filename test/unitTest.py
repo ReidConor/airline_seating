@@ -1,4 +1,6 @@
 import unittest
+from . import main
+
 
 #from https://docs.python.org/2/library/unittest.html
 class airlineReservationSystemTests(unittest.TestCase):
