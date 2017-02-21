@@ -7,6 +7,9 @@ def clean_db(DB):
     for n in range(60):
         # print("update seating set `name` = '' where `_rowid_` = %s" % (n+1,))
         c.execute("update seating set `name` = '' where `_rowid_` = %s" % (n+1,))
+
+    c.execute("UPDATE metrics SET passengers_separated=0")
+    c.execute("UPDATE metrics SET passengers_refused=0")
     conn.commit()
     conn.close()
 
