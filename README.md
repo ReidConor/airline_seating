@@ -47,14 +47,21 @@ Some unit and integration tests are included in this project. To run these use:
 The amount of tests that pass and fail with be printed to the console. 
 
 ## Program Steps
-- Read in Bookings
-    Here is step one
 
-- Read the Database Details
+A .csv file containing bookings is read line by line, each stored in a "booking" object and appended to a list. This list is returned.
+
+Next, the database is queried and details extracted. Details include the dimentions of the plane, the number of pre-exisitng bookings and the number of free seats available. These details are stored in a dictionary, and returned. 
+
+The main body of the program calls the two functions above. It then begins to allocate bookings (on a first come first serve basis) to the remaining seats in the database. To do this, it first checks if any row has enough free seats on its own to accomadate the next booking. If so, that row is chosen and the booking is fulfilled. When this happens, the booking is considered to be non-separated. When no row has enough seats on its own to accomadate a booking, but the overall number of free seats is greater than the booking size, we consider the booking separated since parties sit in non-ajacent seats. 
+
+1. Read in Bookings
+    A .csv file containing bookings is read line by line, stored in a "booking" object and appended to a list. This list is returned. 
+
+2. Read the Database Details
     Here is step two
-- Make the Bookings
+3. Make the Bookings
     Here is step three
-- Print Summary
+4. Print Summary
     Here is step four
 
 ## Author
