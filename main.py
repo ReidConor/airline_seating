@@ -150,7 +150,7 @@ def make_bookings(bookingsList, planeDetails, db):
 #main function that calls the above
 def main(db, bookings):
 
-    dbOperations.clean_db(db)#clean the db's exsiting entries if required, commented out for submission perposes, used a lot during development
+    #dbOperations.clean_db(db)#clean the db's exsiting entries if required, commented out for submission perposes, used a lot during development
 
     bookingsList = read_in_data(bookings) #read in the data
 
