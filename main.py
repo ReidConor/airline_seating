@@ -177,10 +177,6 @@ def make_bookings(bookingsList, planeDetails, db):
             conn.commit()
 
 def main(db, bookings):
-    #when running in terminal, clear the screen
-    #os.system('cls')#for windows
-    os.system('clear')#for linux based os
-
     #clean the db's exsiting entries if required
     dbOperations.clean_db(db)
 
@@ -206,6 +202,10 @@ def main(db, bookings):
     dbOperations.print_seating_plan(db)
 
 if __name__ == "__main__":#http://stackoverflow.com/questions/6523791/why-is-python-running-my-module-when-i-import-it-and-how-do-i-stop-it
+    #when running in terminal, clear the screen
+    #os.system('cls')#for windows
+    os.system('clear')#for linux based os
+
 
     #if args are three (ie file name itself, and the db and bookings file names)
     #use those
