@@ -42,7 +42,7 @@ def print_seating_plan(DB):
 
     # print the dict
     print()
-    print("Airplane Seating Arrangement")
-    print("-----------------------------")
+    print("Airplane Seating Arrangement After Booking")
+    print("-------------------------------------------")
     for key, values in myDict.items():
         print (values)
