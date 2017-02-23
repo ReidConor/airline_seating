@@ -1,10 +1,18 @@
 import sqlite3
+import numpy as np
 
 def clean_db(DB):
     # conn = sqlite3.connect('./data/airline_seating.db')
     conn = sqlite3.connect(DB)
     c = conn.cursor()
-    for n in range(60):
+
+    rows_and_columns = conn.cursor().execute("SELECT * FROM rows_cols;").fetchone()
+    rows = np.arange(1,rows_and_columns[0]+1)
+    seats = (rows_and_columns[1])
+
+    numberOfSeats = len(rows) * len(seats)
+
+    for n in range(numberOfSeats):
         # print("update seating set `name` = '' where `_rowid_` = %s" % (n+1,))
         c.execute("update seating set `name` = '' where `_rowid_` = %s" % (n+1,))
 
@@ -19,12 +27,13 @@ def print_seating_plan(DB):
     # conn = sqlite3.connect('./data/airline_seating.db')
     conn = sqlite3.connect(DB)
     c = conn.cursor()
+    rows_and_columns = c.execute("SELECT * FROM rows_cols;").fetchone()
     all_seats = c.execute("select * from seating")
 
     # create the dict, assign the row number as the key
     # and an empty list as the value
     myDict = {}
-    for n in range (15):
+    for n in range (rows_and_columns[0]):
         myDict[n+1] = []
 
     # fill the dict with the names of people in each seat
@@ -32,5 +41,8 @@ def print_seating_plan(DB):
         myDict[row].append(name)
 
     # print the dict
+    print()
+    print("Airplane Seating Arrangement")
+    print("-----------------------------")
     for key, values in myDict.items():
         print (values)

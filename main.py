@@ -7,7 +7,15 @@ from model import booking
 from db import dbOperations
 
 def read_in_data(pathToFile):
-    bookingsFile = pd.read_csv(pathToFile, sep=",", header=None)
+    #catch an empty bookings file in a graceful way
+    try:
+        bookingsFile = pd.read_csv(pathToFile, sep=",", header=None)
+    except pd.io.common.EmptyDataError:
+        print("Bookings file is empty! Try another file..")
+        bookingsFile = pd.DataFrame()
+    except:
+        raise
+
     allBookings = []
     for index, row in bookingsFile.iterrows():
         nextBooking = booking.Booking(row[0],row[1])
@@ -15,12 +23,11 @@ def read_in_data(pathToFile):
 
     #below is a list of booking objects,
     #containing all bookings to be made
-    # print(len(allBookings))
     return allBookings
 
 
 #############
-#Get all detais from the db and return. Some metrics returned may not be used
+#Get all detais from the db and return. Some metrics returned may not be used in the end
 #############
 def read_plane_details(pathToDB):
     #make a db connection
@@ -169,22 +176,7 @@ def make_bookings(bookingsList, planeDetails, db):
             c.execute("UPDATE metrics SET passengers_refused='%s'" %passengersRejected)
             conn.commit()
 
-def main():
-    #when running in terminal, clear the screen
-    #os.system('cls')#for windows
-    os.system('clear')#for linux based os
-
-    #if args are three (ie file name itself, and the db and bookings file names)
-    #use those
-    #if not, use those stored in the project
-    if len(sys.argv) == 3:
-        db = sys.argv[1]
-        bookings = sys.argv[2]
-    else:
-        print("No arguments provided. Using db and bookings files contained in the project.")
-        db = "db/airline_seating.db"
-        bookings = "data/bookings.csv"
-
+def main(db, bookings):
     #clean the db's exsiting entries if required
     dbOperations.clean_db(db)
 
@@ -209,4 +201,21 @@ def main():
     #print the layout of the plane
     dbOperations.print_seating_plan(db)
 
-main()
+if __name__ == "__main__":#http://stackoverflow.com/questions/6523791/why-is-python-running-my-module-when-i-import-it-and-how-do-i-stop-it
+    #when running in terminal, clear the screen
+    #os.system('cls')#for windows
+    os.system('clear')#for linux based os
+
+
+    #if args are three (ie file name itself, and the db and bookings file names)
+    #use those
+    #if not, use those stored in the project
+    if len(sys.argv) == 3:
+        db = sys.argv[1]
+        bookings = sys.argv[2]
+    else:
+        print("No arguments provided. Using db and bookings files contained in the project.")
+        db = "db/airline_seating.db"
+        bookings = "data/bookings.csv"
+
+    main(db, bookings)
