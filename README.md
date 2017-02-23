@@ -8,56 +8,57 @@ This is a short note on how to get this project setup in your local environment,
 
 ### Prerequisites
 
-What things you need installed and how to install them to get this running, i.e. python version
+This program has been developed and tested using Python 3.5.2. Thus it is highly recommend to use Python 3.X.X when developing and running further. 
 
-```
-Give examples
-```
-
-### Installing
-
-How to get this project installed
-
-Say what the step will be
-
-```
-Give the example
-```
+The version of Sqlite3 used during development is 3.13.0. Again, using a similar version for future development and running is likely to prevent error. 
 
 ### Tools
 
+Listed here are the tools that were used during development of the Airline Seating program. 
 
+- [Atom](https://atom.io)
+- [db visualizer for sqlite3](http://www.dbvis.com/doc/sqlite-database-support/)
+- Terminal
+- Excel
 
-List some tools that were used during development
+## Running Airline Seating
+Run the main file with
 
-## Running the program
+```
+    python seat_assign_10345681.py
+```
+The above command runs the program with the stock db and bookings file provided in the asignment brief. To run the program aganist an alternative database or list of bookings, use:
+```
+    python seat_assign_10345681.py <path_to_db> <path_to_bookings>
+```
 
-- Step One
-
- This is the first step
-- Step Two
-	This is the second step
+Some sumary details are printed to the console for priliminary inspection including;
+- The number of passengers sitting together
+- The number sitting apart
+- The number of refused passengers. 
 
 ## Running the tests
 
-Some limited tests are included in this project. To run these, navigate to the 
+Some unit and integration tests are included in this project. To run these use:
 ```
-/test/
-```
-directory and execute
-
-```
-python unitTest.py
+    python seat_assign_10345681_test.py
 ```
 
+The amount of tests that pass and fail with be printed to the console. 
+
+## Program Steps
+- Read in Bookings
+    Here is step one
+
+- Read the Database Details
+    Here is step two
+- Make the Bookings
+    Here is step three
+- Print Summary
+    Here is step four
 
 ## Author
 
-* **Conor Reid** - *C10345681* 
-
-
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
+* **Conor Reid** 
+    *C10345681* 
+    conor.reid@ucdconnect.ie
