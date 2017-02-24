@@ -48,21 +48,16 @@ The amount of tests that pass and fail with be printed to the console.
 
 ## Program Steps
 
-A .csv file containing bookings is read line by line, each stored in a "booking" object and appended to a list. This list is returned.
+A .csv file containing bookings is read line by line (```read_in_data```), each record stored in a "booking" object and appended to a list. This list is returned to be used in the main function.
 
-Next, the database is queried and details extracted. Details include the dimentions of the plane, the number of pre-exisitng bookings and the number of free seats available. These details are stored in a dictionary, and returned. 
+Next, the database is queried and details extracted (```read_plane_details```). Details include the dimensions of the plane, the number of pre-existing bookings and the number of free seats available. These details are stored in a dictionary, and returned. A dictionary is returned here for clarity of use and easy value look-up later on. 
 
-The main body of the program calls the two functions above. It then begins to allocate bookings (on a first come first serve basis) to the remaining seats in the database. To do this, it first checks if any row has enough free seats on its own to accomadate the next booking. If so, that row is chosen and the booking is fulfilled. When this happens, the booking is considered to be non-separated. When no row has enough seats on its own to accomadate a booking, but the overall number of free seats is greater than the booking size, we consider the booking separated since parties sit in non-ajacent seats. 
+The main function in the program (```make_bookings```) calls the two functions above. It then begins to allocate bookings (on a first come first serve basis) to the remaining seats in the database. To do this, it first checks if any row has exactly enough seats to accommodate the next booking. If so, this row is chosen. If not, a row with more than enough seats is chosen and the booking is fulfilled. When this happens, the booking is considered to be non-separated. When no row has enough seats on its own to accommodate the next booking, but the overall number of free seats is greater than the booking size, we consider the booking separated since parties sit in non-adjacent seats. A record of these cases is kept, and written to the database.
 
-1. Read in Bookings
-    A .csv file containing bookings is read line by line, stored in a "booking" object and appended to a list. This list is returned. 
+Once the amount of free seats in the database reaches zero, all subsequent bookings are rejected. A count of these is kept, and written to the database metrics table before the application terminates. 
 
-2. Read the Database Details
-    Here is step two
-3. Make the Bookings
-    Here is step three
-4. Print Summary
-    Here is step four
+For more technical and detailed documentation, see comments in the [seat_assign_10345681.py](https://github.com/ReidConor/airline_seating/blob/master/seat_assign_10345681.py) file.
+
 
 ## Author
 
