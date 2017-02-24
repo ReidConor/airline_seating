@@ -62,5 +62,7 @@ For more technical and detailed documentation, see comments in the [seat_assign_
 ## Author
 
 * **Conor Reid** 
+
     *C10345681* 
+
     conor.reid@ucdconnect.ie
